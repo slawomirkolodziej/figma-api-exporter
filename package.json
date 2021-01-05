@@ -16,7 +16,7 @@
     "typescript": "^3.7.4"
   },
   "dependencies": {
-    "axios": "^0.19.1",
+    "axios": "^0.21.1",
     "fs": "^0.0.1-security",
     "ramda": "^0.26.1",
     "rimraf": "^3.0.0",
