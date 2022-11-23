@@ -23,6 +23,9 @@ export type GetSvgsConfig = {
   fileId: string;
   canvas?: CanvasFilterParam;
   component?: NodeFilterParam;
+
+  // Defaults to 100.
+  batchSize?: number;
 };
 
 const filterByCanvas = (canvasFilter: CanvasFilterParam) => (
@@ -62,6 +65,7 @@ export default (client: ClientInterface) => async (
   const fileData = await client.file(config.fileId);
   const processedFile = processFile(fileData.data, config.fileId);
   const fileLastModified = fileData.data.lastModified;
+  const batchSize = config.batchSize || 100;
 
   const optionallyFilterByCanvas = (config.canvas
     ? filterByCanvas(config.canvas)
@@ -82,15 +86,16 @@ export default (client: ClientInterface) => async (
   }
 
   const svgsIds = map(prop("id"))(componentsData);
-
-  const svgsExportResponse = await client.fileImages(config.fileId, {
+  const batchCount = Math.ceil(svgsIds.length / batchSize);
+  const promises = Array.from(Array(batchCount), (_, i) => client.fileImages(config.fileId, {
     format: "svg",
-    ids: svgsIds
-  });
+    ids: svgsIds.slice(i * batchSize, (i + 1) * batchSize)
+  }))
 
-  const svgsUrls = svgsExportResponse.data.images;
-
-  const svgsData = map(getSvgDataFromImageData(svgsUrls))(componentsData);
+  const svgsData = (await Promise.all(promises)).flatMap((response, index) => {
+    const svgUrls = response.data.images;
+    return map(getSvgDataFromImageData(svgUrls))(componentsData.slice(index * batchSize, (index + 1) * batchSize))
+  })
 
   return { svgs: svgsData, lastModified: fileLastModified };
 };
