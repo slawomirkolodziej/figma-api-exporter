@@ -33,10 +33,6 @@ const createDir = (dir: string): Promise<any> => {
   });
 };
 
-const removeFilesFromDirectory = async (directory: string): Promise<any> => {
-  return new Promise(resolve => rimraf(directory, resolve));
-};
-
 const getDataFromConfig = async (
   configFilePath: string
 ): Promise<ConfigFileData> => {
@@ -108,7 +104,7 @@ export default async (config: DownloadSvgsConfig): Promise<void> => {
   }
 
   if (config.clearDirectory) {
-    await removeFilesFromDirectory(config.saveDirectory);
+    await rimraf(config.saveDirectory);
   }
 
   await createDir(config.saveDirectory);
