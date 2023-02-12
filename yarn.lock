@@ -192,7 +192,7 @@
   dependencies:
     "xtend" "^4.0.0"
 
-"figma-js@^1.9.0":
+"figma-js@1.16.0":
   "integrity" "sha512-cImQT9DAJp1J0xr6FMUAswXKEnjwrDz4QKAgIBpUyydKAgDS/lm862stjweHp99uco5qLoNv+GbwQWBHyDvDQw=="
   "resolved" "https://registry.npmjs.org/figma-js/-/figma-js-1.16.0.tgz"
   "version" "1.16.0"
