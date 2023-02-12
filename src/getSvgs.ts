@@ -31,14 +31,14 @@ export type GetSvgsConfig = {
 const filterByCanvas = (canvasFilter: CanvasFilterParam) => (
   data: ProcessedFile
 ): TransformerNode[] | undefined => {
-  const canvasList: TransformerNode[] = data.shortcuts
-    .CANVAS as TransformerNode[];
+  const pages = data.shortcuts
+    .pages as TransformerNode[];
   if (typeof canvasFilter === "string") {
     return filter((canvas: TransformerNode) => canvas.name === canvasFilter)(
-      canvasList
+      pages
     );
   }
-  return filter(canvasFilter)(canvasList);
+  return filter(canvasFilter)(pages);
 };
 
 const filterByNode = (nodeFilter: NodeFilterParam) => (
@@ -51,7 +51,7 @@ const filterByNode = (nodeFilter: NodeFilterParam) => (
 };
 
 const getComponents = (transformerNode: TransformerNode[]) =>
-  chain((node: TransformerNode) => node.shortcuts.COMPONENT)(transformerNode);
+  chain((node: TransformerNode) => node.shortcuts.components)(transformerNode);
 
 const getSvgDataFromImageData = (svgsUrls: Record<string, string>) => (
   node: TransformerNode
