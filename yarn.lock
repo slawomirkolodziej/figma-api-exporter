@@ -7,12 +7,12 @@
   "resolved" "https://registry.npmjs.org/@types/node/-/node-13.13.52.tgz"
   "version" "13.13.52"
 
-"@types/ramda@^0.26.39":
-  "integrity" "sha512-s0cj9rylWw+Ax/AnttCQzMrLZGq/OxAIZgrkRLK1QHJIF6Qabd0//acMCFM6+Xb8Bi8p8PkT2fqpaQveRju/kA=="
-  "resolved" "https://registry.npmjs.org/@types/ramda/-/ramda-0.26.44.tgz"
-  "version" "0.26.44"
+"@types/ramda@0.28.23":
+  "integrity" "sha512-9TYWiwkew+mCMsL7jZ+kkzy6QXn8PL5/SKmBPmjgUlTpkokZWTBr+OhiIUDztpAEbslWyt24NNfEmZUBFmnXig=="
+  "resolved" "https://registry.npmjs.org/@types/ramda/-/ramda-0.28.23.tgz"
+  "version" "0.28.23"
   dependencies:
-    "ts-toolbelt" "^6.3.3"
+    "ts-toolbelt" "^6.15.1"
 
 "@types/strip-bom@^3.0.0":
   "integrity" "sha1-FKjsOVbC6B7bdSB5CuzyHCkK69I= sha512-xevGOReSYGM7g/kUBZzPqCrR/KYAo+F0yiPc85WFTJa0MSLtyFTVTU6cJu/aV4mid7IffDIWqo69THF2o4JiEQ=="
@@ -347,10 +347,10 @@
   "resolved" "https://registry.npmjs.org/proxy-from-env/-/proxy-from-env-1.1.0.tgz"
   "version" "1.1.0"
 
-"ramda@^0.26.1":
-  "integrity" "sha512-hLWjpy7EnsDBb0p+Z3B7rPi3GDeRG5ZtiI33kJhTt+ORCd38AbAIjB/9zRIUoeTbE/AVX5ZkU7m6bznsvrf8eQ=="
-  "resolved" "https://registry.npmjs.org/ramda/-/ramda-0.26.1.tgz"
-  "version" "0.26.1"
+"ramda@0.28.0":
+  "integrity" "sha512-9QnLuG/kPVgWvMQ4aODhsBUFKOUmnbUnsSXACv+NCQZcHbeb+v8Lodp8OVxtRULN1/xOyYLLaL6npE6dMq5QTA=="
+  "resolved" "https://registry.npmjs.org/ramda/-/ramda-0.28.0.tgz"
+  "version" "0.28.0"
 
 "readdirp@~3.6.0":
   "integrity" "sha512-hOS089on8RduqdbhvQ5Z37A0ESjsqz6qnRcffsMU3495FuTdqSm+7bhJ29JvIOsBDEEnan5DPu9t3To9VRlMzA=="
@@ -458,7 +458,7 @@
     "source-map-support" "^0.5.17"
     "yn" "3.1.1"
 
-"ts-toolbelt@^6.3.3":
+"ts-toolbelt@^6.15.1":
   "integrity" "sha512-FZIXf1ksVyLcfr7M317jbB67XFJhOO1YqdTcuGaq9q5jLUoTikukZ+98TPjKiP2jC5CgmYdWWYs0s2nLSU0/1A=="
   "resolved" "https://registry.npmjs.org/ts-toolbelt/-/ts-toolbelt-6.15.5.tgz"
   "version" "6.15.5"
