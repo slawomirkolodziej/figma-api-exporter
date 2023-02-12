@@ -1,8 +1,8 @@
 import { Node } from "figma-js";
-import { Shortcut } from "figma-transformer";
+import { Shortcuts } from "figma-transformer";
 
 type TransformerNode = Node & {
-  shortcuts: Record<Shortcut, Node[]>;
+  shortcuts: Shortcuts;
 };
 
 export default TransformerNode;
