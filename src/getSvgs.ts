@@ -1,12 +1,7 @@
-import { ClientInterface, Node } from "figma-js";
-import { processFile, ProcessedFile } from "figma-transformer";
-import { pipe, filter, identity, map, prop, chain, isEmpty } from "ramda";
-import TransformerNode from "./TransformerNode";
+import { Canvas, ClientInterface, Node } from "figma-js";
 
-type CanvasFilterFunction = (canvas: TransformerNode) => boolean;
-type CanvasFilterParam = string | CanvasFilterFunction;
-type NodeFilterFunction = (node: Node) => boolean;
-type NodeFilterParam = string | NodeFilterFunction;
+type CanvasFilterParam = string | ((canvas: Canvas) => boolean);
+type NodeFilterParam = string | ((node: Node) => boolean);
 
 export type SvgData = {
   id: string;
@@ -28,33 +23,48 @@ export type GetSvgsConfig = {
   batchSize?: number;
 };
 
-const filterByCanvas = (canvasFilter: CanvasFilterParam) => (
-  data: ProcessedFile
-): TransformerNode[] | undefined => {
-  const pages = data.shortcuts
-    .pages as TransformerNode[];
+const canvasFilter = (canvasFilter?: CanvasFilterParam) => (canvas: Canvas): boolean => {
+  if (!canvasFilter) return true
+
   if (typeof canvasFilter === "string") {
-    return filter((canvas: TransformerNode) => canvas.name === canvasFilter)(
-      pages
-    );
+    return canvas.name === canvasFilter;
   }
-  return filter(canvasFilter)(pages);
+  return canvasFilter(canvas);
 };
 
-const filterByNode = (nodeFilter: NodeFilterParam) => (
-  data: Node[]
-): Node[] | undefined => {
+const nodeFilter = (nodeFilter?: NodeFilterParam) => (node: Node): boolean => {
+  if (!nodeFilter) return true
+
   if (typeof nodeFilter === "string") {
-    return filter((node: Node) => node.name === nodeFilter)(data);
+    return node.name === nodeFilter;
   }
-  return filter(nodeFilter)(data);
+  return nodeFilter(node);
 };
 
-const getComponents = (transformerNode: TransformerNode[]) =>
-  chain((node: TransformerNode) => node.shortcuts.components)(transformerNode);
+function* walkNodes(root: Node, config: GetSvgsConfig) {
+  const frontier: Node[] = [root]
+  const includeCanvas = canvasFilter(config.canvas)
+  const includeNode = nodeFilter(config.component)
+  while (frontier.length) {
+    const node = frontier.pop()!
+
+    if (node?.type === 'CANVAS') {
+      if (!includeCanvas(node)) continue;
+    }
+
+    if (!includeNode(node)) continue;
+
+    if ('children' in node) {
+      frontier.push(...node.children);
+    }
+
+    if (node.type === 'COMPONENT')
+      yield node
+  }
+}
 
 const getSvgDataFromImageData = (svgsUrls: Record<string, string>) => (
-  node: TransformerNode
+  node: Node
 ): SvgData => {
   return { id: node.id, url: svgsUrls[node.id], name: node.name };
 };
@@ -63,29 +73,17 @@ export default (client: ClientInterface) => async (
   config: GetSvgsConfig
 ): Promise<GetSvgsReturn> => {
   const fileData = await client.file(config.fileId);
-  const processedFile = processFile(fileData.data, config.fileId);
+
+  const components = Array.from(walkNodes(fileData.data.document, config))
+
   const fileLastModified = fileData.data.lastModified;
   const batchSize = config.batchSize || 100;
 
-  const optionallyFilterByCanvas = (config.canvas
-    ? filterByCanvas(config.canvas)
-    : identity) as (data: ProcessedFile) => TransformerNode[];
-
-  const optionallyFilterByComponent = (config.component
-    ? filterByNode(config.component)
-    : identity) as (data: Node[]) => Node[];
-
-  const componentsData = pipe(
-    optionallyFilterByCanvas,
-    getComponents,
-    optionallyFilterByComponent
-  )(processedFile) as TransformerNode[];
-
-  if (isEmpty(componentsData)) {
+  if (!components.length) {
     return { svgs: [], lastModified: fileLastModified };
   }
 
-  const svgsIds = map(prop("id"))(componentsData);
+  const svgsIds = components.map(c => c.id)
   const batchCount = Math.ceil(svgsIds.length / batchSize);
   const promises = Array.from(Array(batchCount), (_, i) => client.fileImages(config.fileId, {
     format: "svg",
@@ -94,7 +92,7 @@ export default (client: ClientInterface) => async (
 
   const svgsData = (await Promise.all(promises)).flatMap((response, index) => {
     const svgUrls = response.data.images;
-    return map(getSvgDataFromImageData(svgUrls))(componentsData.slice(index * batchSize, (index + 1) * batchSize))
+    return components.slice(index * batchSize, (index + 1) * batchSize).map(getSvgDataFromImageData(svgUrls))
   })
 
   return { svgs: svgsData, lastModified: fileLastModified };

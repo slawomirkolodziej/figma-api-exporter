@@ -1,8 +1,6 @@
 import * as fs from "fs";
 import * as path from "path";
-import rimraf from "rimraf";
 import axios from "axios";
-import { map, equals } from "ramda";
 
 import { SvgData } from "./getSvgs";
 
@@ -90,21 +88,23 @@ const saveConfigFile = async (
 
 export default async (config: DownloadSvgsConfig): Promise<void> => {
   const DOWNLOAD_CONFIG_FILENAME = "downloadData.json";
-  const componentIds = map((data: SvgData) => data.id)(config.svgsData);
+  const componentIds = config.svgsData.map(d => d.id);
 
   const dataFromConfig = await getDataFromConfig(
     path.join(config.saveDirectory, DOWNLOAD_CONFIG_FILENAME)
   );
+
+  const arraysEqual = (a1: string[], a2: string[]) => a1.length === a2.length && a1.every(item => a2.includes(item))
   const shouldDownloadSvgs =
     config.lastModified !== dataFromConfig.lastModified ||
-    !equals(componentIds, dataFromConfig.componentIds);
+    !arraysEqual(componentIds, dataFromConfig.componentIds ?? []);
 
   if (!shouldDownloadSvgs) {
     return Promise.resolve();
   }
 
   if (config.clearDirectory) {
-    await rimraf(config.saveDirectory);
+    await fs.rmSync(config.saveDirectory, { recursive: true, force: true });
   }
 
   await createDir(config.saveDirectory);
