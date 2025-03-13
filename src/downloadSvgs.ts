@@ -1,6 +1,5 @@
 import * as fs from "fs";
 import * as path from "path";
-import axios from "axios";
 
 import { SvgData } from "./getSvgs";
 
@@ -12,7 +11,7 @@ type DownloadSvgsConfig = {
 };
 
 type DownloadedSvgData = {
-  data: any;
+  data: string;
   name: string;
 };
 
@@ -49,10 +48,10 @@ const downloadSvgsData = (svgsData: SvgData[]): Promise<DownloadedSvgData[]> =>
   Promise.all(
     svgsData.map(
       async (data): Promise<DownloadedSvgData> => {
-        const downloadedSvg = await axios.get(data.url);
+        const downloadedSvg = await fetch(data.url).then(r => r.text());
 
         return {
-          data: downloadedSvg.data,
+          data: downloadedSvg,
           name: data.name
         };
       }

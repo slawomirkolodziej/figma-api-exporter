@@ -1,6 +1,6 @@
-import { Canvas, ClientInterface, Node } from "figma-js";
+import FigmaClient, { Node } from "./figmaClient";
 
-type CanvasFilterParam = string | ((canvas: Canvas) => boolean);
+type CanvasFilterParam = string | ((canvas: Node) => boolean);
 type NodeFilterParam = string | ((node: Node) => boolean);
 
 export type SvgData = {
@@ -23,7 +23,7 @@ export type GetSvgsConfig = {
   batchSize?: number;
 };
 
-const canvasFilter = (canvasFilter?: CanvasFilterParam) => (canvas: Canvas): boolean => {
+const canvasFilter = (canvasFilter?: CanvasFilterParam) => (canvas: Node): boolean => {
   if (!canvasFilter) return true
 
   if (typeof canvasFilter === "string") {
@@ -55,7 +55,7 @@ function* walkNodes(root: Node, config: GetSvgsConfig) {
     if (!includeNode(node)) continue;
 
     if ('children' in node) {
-      frontier.push(...node.children);
+      frontier.push(...node.children ?? []);
     }
 
     if (node.type === 'COMPONENT')
@@ -69,14 +69,14 @@ const getSvgDataFromImageData = (svgsUrls: Record<string, string>) => (
   return { id: node.id, url: svgsUrls[node.id], name: node.name };
 };
 
-export default (client: ClientInterface) => async (
+export default (client: FigmaClient) => async (
   config: GetSvgsConfig
 ): Promise<GetSvgsReturn> => {
   const fileData = await client.file(config.fileId);
 
-  const components = Array.from(walkNodes(fileData.data.document, config))
+  const components = Array.from(walkNodes(fileData.document, config))
 
-  const fileLastModified = fileData.data.lastModified;
+  const fileLastModified = fileData.lastModified;
   const batchSize = config.batchSize || 100;
 
   if (!components.length) {
@@ -91,7 +91,7 @@ export default (client: ClientInterface) => async (
   }))
 
   const svgsData = (await Promise.all(promises)).flatMap((response, index) => {
-    const svgUrls = response.data.images;
+    const svgUrls = response.images;
     return components.slice(index * batchSize, (index + 1) * batchSize).map(getSvgDataFromImageData(svgUrls))
   })
 

@@ -1,10 +1,9 @@
-import * as Figma from "figma-js";
-
 import getSvgs from "./getSvgs";
 import downloadSvgs from "./downloadSvgs";
+import FigmaClient from "./figmaClient";
 
 export default (token: string) => {
-  const client = Figma.Client({
+  const client = new FigmaClient({
     personalAccessToken: token
   });
 

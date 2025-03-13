@@ -3,23 +3,22 @@
   "author": "Sławomir Kołodziej",
   "version": "0.0.2",
   "scripts": {
-    "start": "ts-node-dev src/index.ts",
     "prepare": "tsc"
   },
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "devDependencies": {
-    "@types/node": "20.11.5",
-    "ts-node-dev": "2.0.0",
-    "typescript": "5.3.3"
+    "@types/node": "22.13.10",
+    "typescript": "5.8.2"
   },
-  "dependencies": {
-    "axios": "1.8.2",
-    "figma-js": "1.16.1-0"
-  },
-  "overrides": {
-    "figma-js": {
-      "axios": "$axios"
+  "contributors": [
+    {
+      "name": "Sławomir Kołodziej",
+      "email": "slawomir@kolodziej.io"
+    },
+    {
+      "name": "Jay Harris",
+      "email": "jay.harris@outlook.co.nz"
     }
-  }
+  ]
 }
