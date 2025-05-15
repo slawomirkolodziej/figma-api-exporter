@@ -2,13 +2,13 @@ import getSvgs from "./getSvgs";
 import downloadSvgs from "./downloadSvgs";
 import FigmaClient from "./figmaClient";
 
-export default (token: string) => {
+export const figmaApiExporter = (token: string) => {
   const client = new FigmaClient({
-    personalAccessToken: token
+    personalAccessToken: token,
   });
 
   return {
     getSvgs: getSvgs(client),
-    downloadSvgs
+    downloadSvgs,
   };
 };
