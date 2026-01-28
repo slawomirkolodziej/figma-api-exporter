@@ -44,19 +44,18 @@ const getDataFromConfig = async (
   });
 };
 
-const downloadSvgsData = (svgsData: SvgData[]): Promise<DownloadedSvgData[]> =>
-  Promise.all(
-    svgsData.map(
-      async (data): Promise<DownloadedSvgData> => {
-        const downloadedSvg = await fetch(data.url).then(r => r.text());
-
-        return {
-          data: downloadedSvg,
-          name: data.name
-        };
-      }
-    )
-  );
+const downloadSvgsData = async (svgsData: SvgData[]): Promise<DownloadedSvgData[]> => {
+  const batchSize = 100;
+  const downloadedSvgsData: DownloadedSvgData[] = [];
+  for (let i = 0; i < svgsData.length; i += batchSize) {
+    const data = await Promise.all(svgsData.slice(i, i + batchSize).map(svg => fetch(svg.url).then(async r => ({
+      data: await r.text(),
+      name: svg.name
+    }))));
+    downloadedSvgsData.push(...data);
+  }
+  return downloadedSvgsData;
+}
 
 const saveSvgsToFiles = async (
   downloadedSvgsData: DownloadedSvgData[],

@@ -85,15 +85,16 @@ export default (client: FigmaClient) => async (
 
   const svgsIds = components.map(c => c.id)
   const batchCount = Math.ceil(svgsIds.length / batchSize);
-  const promises = Array.from(Array(batchCount), (_, i) => client.fileImages(config.fileId, {
-    format: "svg",
-    ids: svgsIds.slice(i * batchSize, (i + 1) * batchSize)
-  }))
 
-  const svgsData = (await Promise.all(promises)).flatMap((response, index) => {
-    const svgUrls = response.images;
-    return components.slice(index * batchSize, (index + 1) * batchSize).map(getSvgDataFromImageData(svgUrls))
-  })
+  const svgsData: SvgData[] = [];
+  for (let i = 0; i < batchCount; i++) {
+    const data = await client.fileImages(config.fileId, {
+      format: "svg",
+      ids: svgsIds.slice(i * batchSize, (i + 1) * batchSize)
+    })
+
+    svgsData.push(...components.slice(i * batchSize, (i + 1) * batchSize).map(getSvgDataFromImageData(data.images)))
+  }
 
   return { svgs: svgsData, lastModified: fileLastModified };
 };

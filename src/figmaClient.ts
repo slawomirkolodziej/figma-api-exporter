@@ -59,6 +59,8 @@ export interface FileResponse {
 
 }
 
+const wait = (delay: number) => new Promise<void>(resolve => setTimeout(resolve, delay));
+
 export default class FigmaClient {
     headers: Record<string, string>;
     baseUrl = 'https://api.figma.com/v1';
@@ -71,7 +73,7 @@ export default class FigmaClient {
         };
     }
 
-    async get<T extends {}>(path: string, params?: Record<string, string | string[] | number | boolean>): Promise<T> {
+    async get<T extends {}>(path: string, params?: Record<string, string | string[] | number | boolean>, maxRetries = 3): Promise<T> {
         const query = new URLSearchParams()
         for (const [key, value] of Object.entries(params ?? {})) {
 
@@ -82,12 +84,18 @@ export default class FigmaClient {
         }
 
         const queryString = query.size === 0 ? '' : `?${query.toString().replaceAll('%3A', ':').replaceAll('%2C', ',')}`;
-        const data = await fetch(`${this.baseUrl}/${path}${queryString}`, {
+        const response = await fetch(`${this.baseUrl}/${path}${queryString}`, {
             headers: this.headers,
         })
-            .then(r => r.json()) as T | ErrorResponse;
+        const data = await response.json() as T | ErrorResponse;
 
         if ('err' in data && data.err) {
+            const retryAfter = parseInt(response.headers.get('retry-after') ?? '1');
+            if (maxRetries > 0 && !isNaN(retryAfter)) {
+                await wait(retryAfter * 1000);
+                return this.get(path, params, maxRetries - 1);
+            }
+
             throw new Error(data.err);
         }
 
